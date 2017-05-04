@@ -16,10 +16,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -27,10 +24,12 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     EditText username, password, confirm, email;
     Button register;
     LocationManager locationManager;
+    private boolean isLocationUpdated = false;
+    String[] input = new String[5];
+    RegisterService registerService = new RegisterService();
 
-    InvokeWebService registerService=new InvokeWebService();
+    double latitude, longitude;
 
-    double latitude,longitude;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,7 +40,6 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
         email = (EditText) findViewById(R.id.emailText);
         register = (Button) findViewById(R.id.register);
         register.setOnClickListener(this);
-
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
     }
 
@@ -63,42 +61,31 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()){
+        switch (v.getId()) {
             case R.id.register:
-                if((password.getText().toString().equals(confirm.getText().toString())) && (!email.getText().toString().equals("")) && (!password.getText().toString().equals("")) && (!username.getText().toString().equals("")) && (email.getText().toString().contains("@"))){
-                    if(longitude!=0 && latitude!=0) {
-                        Log.i("Register","lat"+latitude+"long"+longitude);
-                        String[] input=new String[5];
-                        input[0]=username.getText().toString();
-                        input[1]=password.getText().toString();
-                        input[2]=email.getText().toString();
-                        input[3]=(new Double(latitude)).toString();
-                        input[4]=(new Double(longitude)).toString();
-                        registerService.execute(input);
+                if ((password.getText().toString().equals(confirm.getText().toString())) && (!email.getText().toString().equals("")) && (!password.getText().toString().equals("")) && (!username.getText().toString().equals("")) && (email.getText().toString().contains("@"))) {
+                    if (longitude != 0 && latitude != 0) {
+                        Log.i("Register", "lat" + latitude + "long" + longitude);
+
+                        input[0] = username.getText().toString();
+                        input[1] = password.getText().toString();
+                        input[2] = email.getText().toString();
+                        input[3] = (new Double(latitude)).toString();
+                        input[4] = (new Double(longitude)).toString();
+                        new RegisterService().execute(input);
                         Toast.makeText(getApplicationContext(), "Registration Successful", Toast.LENGTH_LONG).show();
-                        Intent intent = new Intent(this, MainActivity.class);
+
+                        Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                         startActivity(intent);
                     }
-                    else{
-                        do{
-                            try {
-                                wait(30);
-                            }catch (Exception e){
-                                e.printStackTrace();
-                            }
-                        }while(latitude!=0 && longitude!=0);
-                    }
-                }
-                else if(!password.getText().toString().equals(confirm.getText().toString())){
+
+                } else if (!password.getText().toString().equals(confirm.getText().toString())) {
                     confirm.setError("Passwords don't match");
-                }
-                else if(email.getText().toString().equals("")){
+                } else if (email.getText().toString().equals("")) {
                     email.setError("Enter email");
-                }
-                else if(username.getText().toString().equals("")){
+                } else if (username.getText().toString().equals("")) {
                     username.setError("Enter username");
-                }
-                else if(!email.getText().toString().contains("@")){
+                } else if (!email.getText().toString().contains("@")) {
                     email.setError("Email should contain @");
                 }
                 break;
@@ -107,9 +94,21 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
     @Override
     public void onLocationChanged(Location location) {
-        latitude=location.getLatitude();
-        longitude=location.getLongitude();
-        Log.i("Register","Got lat and long"+latitude+"long"+longitude);
+        if (!isLocationUpdated) {
+            latitude = location.getLatitude();
+            longitude = location.getLongitude();
+            Log.i("Register", "Got lat and long" + latitude + "long" + longitude);
+            if (!isLocationUpdated) {
+                isLocationUpdated = true;
+
+                if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    // TODO: Consider calling
+
+                    return;
+                }
+                locationManager.removeUpdates(this);
+            }
+        }
     }
 
     @Override
@@ -128,11 +127,13 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
     }
 
 
-    private class InvokeWebService extends AsyncTask<String, Integer,String> {
+    private class RegisterService extends AsyncTask<String, Integer,String> {
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            registerService.cancel(true);
+
         }
 
         @Override
@@ -147,37 +148,27 @@ public class RegisterActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         protected String doInBackground(String... params) {
+            Log.d("Register","im here");
             URL url;
             String response="";
-            String requestURL="http://localhost/databases/index.php?";
+            HttpURLConnection connection=null;
             try{
-                url=new URL(requestURL);
-                HttpURLConnection httpURLConnection=(HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                 httpURLConnection.setDoInput(true);
-                httpURLConnection.setDoOutput(true);
-
-                OutputStream outputStream=httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter= new BufferedWriter(new OutputStreamWriter(outputStream));
-                StringBuilder builder=new StringBuilder();
-                builder.append("username="+params[0]+"&").append("password="+params[1]+"&").append("email="+params[2]+"&").append("latitude="+params[3]+"&").append("longitude="+params[4]);
-                String str=builder.toString();
-                Log.i("Register","string"+str);
-                bufferedWriter.write(str);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-
-                int responseCode=httpURLConnection.getResponseCode();
-                if(responseCode==HttpURLConnection.HTTP_OK){
+                String urlstring="http://10.0.0.34/databases/index.php";
+                urlstring+="?username="+params[0]+"&password="+params[1]+"&email="+params[2]+"&latitude="+params[3]+"&longitude="+params[4];
+                url=new URL(urlstring);
+                connection=(HttpURLConnection)url.openConnection();
+                int code=connection.getResponseCode();
+                Log.i("Register","respcode"+code);
+                if(code==HttpURLConnection.HTTP_OK){
                     String line;
-                    BufferedReader bufferedReader=new BufferedReader(new InputStreamReader(httpURLConnection.getInputStream()));
-                    line=bufferedReader.readLine();
-                    while (line!=null){
+                    BufferedReader br=new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                    line=br.readLine();
+                    while(line!=null){
                         response+=line;
-                        line=bufferedReader.readLine();
+                        line=br.readLine();
                     }
-                    bufferedReader.close();
                 }
+                connection.disconnect();
             }catch (Exception e){
                 e.printStackTrace();
             }

@@ -23,6 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPersonName"
+        android:hint="Enter username"
         android:ems="10"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"
@@ -43,16 +44,6 @@
         android:layout_alignEnd="@+id/user"
         android:layout_marginTop="40dp"
         android:id="@+id/pass" />
-
-    <TextView
-        android:text="Password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/pass"
-        android:layout_alignRight="@+id/username"
-        android:layout_alignEnd="@+id/username"
-        android:layout_marginBottom="11dp"
-        android:id="@+id/Password" />
 
     <Button
         android:text="Login"
@@ -76,5 +67,15 @@
         android:layout_marginLeft="49dp"
         android:layout_marginStart="49dp"
         android:id="@+id/register" />
+
+    <TextView
+        android:text="Password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/Password"
+        android:layout_alignBaseline="@+id/pass"
+        android:layout_alignBottom="@+id/pass"
+        android:layout_alignLeft="@+id/username"
+        android:layout_alignStart="@+id/username" />
 
 </RelativeLayout>

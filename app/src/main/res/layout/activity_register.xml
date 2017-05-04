@@ -11,16 +11,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.lecture.nitika.friendfinder.RegisterActivity">
 
-    <TextView
-        android:text="Enter Password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/username"
-        android:layout_alignLeft="@+id/username"
-        android:layout_alignStart="@+id/username"
-        android:layout_marginTop="40dp"
-        android:id="@+id/password" />
-
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -32,16 +22,6 @@
         android:layout_alignBottom="@+id/password"
         android:layout_alignLeft="@+id/userText"
         android:layout_alignStart="@+id/userText" />
-
-    <TextView
-        android:text="Confirm Password"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/confirm"
-        android:layout_alignBaseline="@+id/confirmText"
-        android:layout_alignBottom="@+id/confirmText"
-        android:layout_alignLeft="@+id/password"
-        android:layout_alignStart="@+id/password" />
 
     <EditText
         android:layout_width="wrap_content"
@@ -56,7 +36,7 @@
         android:layout_marginTop="20dp" />
 
     <TextView
-        android:text="TextView"
+        android:text="Email"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/email"
@@ -72,22 +52,11 @@
         android:inputType="textPersonName"
         android:ems="10"
         android:id="@+id/userText"
+        android:hint="Enter username"
         android:layout_alignBaseline="@+id/username"
         android:layout_alignBottom="@+id/username"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
-
-    <TextView
-        android:text="Enter username"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="19dp"
-        android:layout_marginStart="19dp"
-        android:layout_marginTop="64dp"
-        android:id="@+id/username"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
 
     <Button
         android:text="Register"
@@ -102,12 +71,43 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Name"
         android:ems="10"
+        android:hint="Confirm password"
         android:id="@+id/confirmText"
         android:inputType="textPassword"
         android:layout_marginTop="25dp"
         android:layout_below="@+id/passText"
         android:layout_alignParentRight="true"
         android:layout_alignParentEnd="true" />
+
+    <TextView
+        android:text="Confirm Password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/confirm"
+        android:layout_alignBaseline="@+id/confirmText"
+        android:layout_alignBottom="@+id/confirmText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="Enter Password"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:id="@+id/password"
+        android:layout_below="@+id/userText"
+        android:layout_alignRight="@+id/confirm"
+        android:layout_alignEnd="@+id/confirm"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:text="Enter username"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/username"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 </RelativeLayout>

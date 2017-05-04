@@ -1,12 +1,7 @@
 package com.lecture.nitika.friendfinder;
 
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,14 +17,12 @@ import java.io.OutputStreamWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener, LocationListener {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     EditText username, password;
+    String response="";
     Button login, register;
-    LocationManager locationManager;
-    double latitude,longitude;
-    String[] input=new String[4];
+    String[] input=new String[2];
     InvokeWebService loginService=new InvokeWebService();
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,27 +33,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         register = (Button) findViewById(R.id.register);
         login.setOnClickListener(this);
         register.setOnClickListener(this);
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        input[0]=username.getText().toString();
-        input[1]=password.getText().toString();
-        input[2]=(new Double(latitude)).toString();
-        input[3]=(new Double(latitude)).toString();
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+
+
 
     }
 
@@ -82,29 +62,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     password.setError("Enter password");
                 }
                 else{
-                    if(latitude!=0 && longitude!=0){
 
                         /**
-                         * Authenticate if its a valid user
+                         * Authenticate if its a valid user, redirect to maps activity
                          */
-                        Log.i("Login","lat"+latitude+"long"+longitude);
-                        Intent actual=new Intent(this,FinderActivity.class);
-                        actual.putExtra("latitude",latitude);
-                        actual.putExtra("longitude",longitude);
+                        input[0]=username.getText().toString();
+                        input[1]=password.getText().toString();
+                        new InvokeWebService().execute(input);
+                        Intent actual=new Intent(getApplicationContext(),FinderActivity.class);
                         startActivity(actual);
-                    }
-                    else{
-                        do{
-                            try {
-                                wait(30);
-                            }catch (Exception e){
-                                e.printStackTrace();
-                            }
-                        }while(latitude!=0 && longitude!=0);
-                    }
                 }
                 break;
             case R.id.register:
+                /**
+                 * Go to register activity on Register button click
+                 */
                 Intent intent=new Intent(this,RegisterActivity.class);
                 intent.putExtra("user","username");
                 startActivity(intent);
@@ -112,34 +84,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-    @Override
-    public void onLocationChanged(Location location) {
-        latitude=location.getLatitude();
-        longitude=location.getLongitude();
-        //loginService.execute(input);
 
-    }
-
-    @Override
-    public void onStatusChanged(String provider, int status, Bundle extras) {
-
-    }
-
-    @Override
-    public void onProviderEnabled(String provider) {
-
-    }
-
-    @Override
-    public void onProviderDisabled(String provider) {
-
-    }
 
     private class InvokeWebService extends AsyncTask<String, Integer,String> {
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+            loginService.cancel(true);
         }
 
         @Override
@@ -155,21 +107,19 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         @Override
         protected String doInBackground(String... params) {
             URL url;
-            String response="";
-            String requestURL="http://127.0.0.1:80/databases/index.php?";
+            String requestURL="http://10.0.0.34/databases/index.php?";
             HttpURLConnection httpURLConnection=null;
 
             try{
                 url=new URL(requestURL);
                 httpURLConnection=(HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
                 httpURLConnection.setDoInput(true);
                 httpURLConnection.setDoOutput(true);
 
                 OutputStream outputStream=httpURLConnection.getOutputStream();
                 BufferedWriter bufferedWriter= new BufferedWriter(new OutputStreamWriter(outputStream));
                 StringBuilder builder=new StringBuilder();
-                builder.append("username="+params[0]+"&").append("password="+params[1]+"&").append("latitude="+params[2]+"&").append("longitude="+params[3]);
+                builder.append("username="+params[0]+"&").append("password="+params[1]);
                 String str=builder.toString();
                 bufferedWriter.write(str);
                 bufferedWriter.flush();
